@@ -1,0 +1,5 @@
+fastapi>=0.111
+uvicorn[standard]>=0.30
+youtube-transcript-api>=1.2
+openai>=1.30
+pydantic>=2.7

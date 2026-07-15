@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Reel — YouTube Video Summarizer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --teal-deep:#0f3b3d;
+    --teal-panel:#123f41;
+    --paper:#f2ede2;
+    --amber:#e8a33d;
+    --coral:#d96c55;
+    --line: rgba(242,237,226,0.14);
+    --font-display:'Space Grotesk', sans-serif;
+    --font-body:'Inter', sans-serif;
+    --font-mono:'IBM Plex Mono', monospace;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--teal-deep);
+    color:var(--paper);
+    font-family:var(--font-body);
+    min-height:100vh;
+  }
+  .wrap{
+    max-width:760px;
+    margin:0 auto;
+    padding:64px 24px 96px;
+  }
+  .eyebrow{
+    font-family:var(--font-mono);
+    font-size:12px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--amber);
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .eyebrow::before{
+    content:"";
+    width:22px;
+    height:2px;
+    background:var(--amber);
+    display:inline-block;
+  }
+  h1{
+    font-family:var(--font-display);
+    font-weight:700;
+    font-size:clamp(32px, 5vw, 48px);
+    line-height:1.05;
+    margin:14px 0 10px;
+    letter-spacing:-0.01em;
+  }
+  .sub{
+    color:rgba(242,237,226,0.68);
+    font-size:16px;
+    max-width:46ch;
+    margin:0 0 40px;
+  }
+  form{
+    display:flex;
+    gap:10px;
+    padding:6px;
+    background:var(--teal-panel);
+    border:1px solid var(--line);
+    border-radius:10px;
+  }
+  input[type="text"]{
+    flex:1;
+    background:transparent;
+    border:none;
+    outline:none;
+    color:var(--paper);
+    font-family:var(--font-mono);
+    font-size:14px;
+    padding:14px 12px;
+  }
+  input[type="text"]::placeholder{
+    color:rgba(242,237,226,0.4);
+  }
+  button{
+    font-family:var(--font-display);
+    font-weight:600;
+    font-size:14px;
+    background:var(--amber);
+    color:var(--teal-deep);
+    border:none;
+    border-radius:6px;
+    padding:0 22px;
+    cursor:pointer;
+    transition:transform 0.12s ease, background 0.12s ease;
+  }
+  button:hover:not(:disabled){ background:#f0b158; }
+  button:active:not(:disabled){ transform:scale(0.97); }
+  button:disabled{ opacity:0.5; cursor:not-allowed; }
+  button:focus-visible, input:focus-visible{
+    outline:2px solid var(--amber);
+    outline-offset:2px;
+  }
+
+  .status{
+    margin-top:18px;
+    font-family:var(--font-mono);
+    font-size:13px;
+    color:rgba(242,237,226,0.6);
+    min-height:18px;
+  }
+  .status.error{ color:var(--coral); }
+
+  .result{
+    margin-top:48px;
+    display:none;
+  }
+  .result.visible{
+    display:block;
+    animation:fade 0.35s ease;
+  }
+  @keyframes fade{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
+
+  .card{
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:26px 28px;
+    background:var(--teal-panel);
+  }
+  .card + .card{ margin-top:20px; }
+
+  .label{
+    font-family:var(--font-mono);
+    font-size:11px;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    color:var(--amber);
+    margin:0 0 12px;
+  }
+  .title-guess{
+    font-family:var(--font-display);
+    font-size:22px;
+    font-weight:600;
+    margin:0 0 14px;
+  }
+  .summary-text{
+    font-size:15.5px;
+    line-height:1.6;
+    color:rgba(242,237,226,0.88);
+    margin:0;
+  }
+  .audience{
+    margin-top:16px;
+    padding-top:16px;
+    border-top:1px solid var(--line);
+    font-size:13.5px;
+    color:rgba(242,237,226,0.6);
+  }
+  .audience b{ color:var(--paper); font-weight:500; }
+
+  /* Timeline / scrubber, the signature element */
+  .timeline{
+    position:relative;
+    margin:8px 0 4px;
+    padding-left:2px;
+  }
+  .track{
+    position:absolute;
+    left:29px;
+    top:6px;
+    bottom:6px;
+    width:2px;
+    background:var(--line);
+  }
+  .point{
+    position:relative;
+    display:flex;
+    gap:18px;
+    padding:14px 0;
+  }
+  .point:first-child{ padding-top:2px; }
+  .point:last-child{ padding-bottom:2px; }
+  .dot-col{
+    position:relative;
+    width:60px;
+    flex-shrink:0;
+  }
+  .dot{
+    width:10px;
+    height:10px;
+    border-radius:50%;
+    background:var(--amber);
+    position:absolute;
+    left:24px;
+    top:6px;
+    box-shadow:0 0 0 4px var(--teal-panel);
+  }
+  .ts{
+    font-family:var(--font-mono);
+    font-size:12px;
+    color:var(--amber);
+    display:block;
+  }
+  .point-text{
+    font-size:14.5px;
+    line-height:1.55;
+    color:rgba(242,237,226,0.85);
+    padding-top:1px;
+  }
+
+  a.video-link{
+    color:var(--amber);
+    text-decoration:none;
+    border-bottom:1px solid rgba(232,163,61,0.4);
+  }
+  a.video-link:hover{ border-bottom-color:var(--amber); }
+
+  footer{
+    margin-top:56px;
+    font-family:var(--font-mono);
+    font-size:11.5px;
+    color:rgba(242,237,226,0.35);
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .result.visible{ animation:none; }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="eyebrow">Reel</div>
+    <h1>Paste a link, get the play-by-play.</h1>
+    <p class="sub">Drop in a YouTube URL. Reel pulls the transcript and hands back the key points with timestamps, so you know exactly where to jump in.</p>
+
+    <form id="form">
+      <input type="text" id="url" placeholder="https://www.youtube.com/watch?v=..." autocomplete="off" />
+      <button type="submit" id="submitBtn">Summarize</button>
+    </form>
+    <div class="status" id="status"></div>
+
+    <div class="result" id="result">
+      <div class="card">
+        <p class="label">Overview</p>
+        <h2 class="title-guess" id="titleGuess"></h2>
+        <p class="summary-text" id="overallSummary"></p>
+        <p class="audience" id="audience"></p>
+        <p style="margin-top:14px;">
+          <a class="video-link" id="videoLink" href="#" target="_blank" rel="noopener">Watch on YouTube ↗</a>
+        </p>
+      </div>
+
+      <div class="card">
+        <p class="label">Key points</p>
+        <div class="timeline" id="timeline">
+          <div class="track"></div>
+        </div>
+      </div>
+    </div>
+
+    <footer>Built with FastAPI + the OpenAI API. Transcript-based — videos without captions can't be summarized.</footer>
+  </div>
+
+<script>
+const form = document.getElementById('form');
+const statusEl = document.getElementById('status');
+const resultEl = document.getElementById('result');
+const submitBtn = document.getElementById('submitBtn');
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const url = document.getElementById('url').value.trim();
+  if (!url) return;
+
+  resultEl.classList.remove('visible');
+  statusEl.textContent = 'Fetching transcript and summarizing… this can take up to 30s.';
+  statusEl.classList.remove('error');
+  submitBtn.disabled = true;
+
+  try {
+    const res = await fetch('/api/summarize', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url })
+    });
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.detail || 'Something went wrong.');
+    }
+
+    renderResult(data);
+    statusEl.textContent = '';
+  } catch (err) {
+    statusEl.textContent = err.message;
+    statusEl.classList.add('error');
+  } finally {
+    submitBtn.disabled = false;
+  }
+});
+
+function renderResult(data) {
+  const summary = data.summary;
+  document.getElementById('titleGuess').textContent = summary.title_guess;
+  document.getElementById('overallSummary').textContent = summary.overall_summary;
+  document.getElementById('audience').innerHTML = '<b>Best for:</b> ' + summary.audience;
+  document.getElementById('videoLink').href = data.video_url;
+
+  const timeline = document.getElementById('timeline');
+  timeline.innerHTML = '<div class="track"></div>';
+  summary.key_points.forEach(kp => {
+    const point = document.createElement('div');
+    point.className = 'point';
+    point.innerHTML = `
+      <div class="dot-col"><span class="ts">${kp.timestamp}</span><div class="dot"></div></div>
+      <div class="point-text">${kp.point}</div>
+    `;
+    timeline.appendChild(point);
+  });
+
+  resultEl.classList.add('visible');
+}
+</script>
+</body>
+</html>
