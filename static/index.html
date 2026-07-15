@@ -138,6 +138,19 @@
     color:var(--amber);
     margin:0 0 12px;
   }
+  .category-badge{
+    display:inline-block;
+    font-family:var(--font-mono);
+    font-size:11px;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    color:var(--teal-deep);
+    background:var(--amber);
+    padding:4px 10px;
+    border-radius:20px;
+    margin-bottom:10px;
+  }
+  .title-guess{
   .title-guess{
     font-family:var(--font-display);
     font-size:22px;
@@ -243,6 +256,7 @@
     <div class="result" id="result">
       <div class="card">
         <p class="label">Overview</p>
+        <span class="category-badge" id="categoryBadge"></span>
         <h2 class="title-guess" id="titleGuess"></h2>
         <p class="summary-text" id="overallSummary"></p>
         <p class="audience" id="audience"></p>
@@ -302,6 +316,8 @@ form.addEventListener('submit', async (e) => {
 
 function renderResult(data) {
   const summary = data.summary;
+  const cat = data.predicted_category;
+  document.getElementById('categoryBadge').textContent = `${cat.category} · ${Math.round(cat.confidence * 100)}% confidence`;
   document.getElementById('titleGuess').textContent = summary.title_guess;
   document.getElementById('overallSummary').textContent = summary.overall_summary;
   document.getElementById('audience').innerHTML = '<b>Best for:</b> ' + summary.audience;

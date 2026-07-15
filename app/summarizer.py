@@ -12,6 +12,7 @@ from youtube_transcript_api._errors import (
 )
 
 from .models import VideoSummary
+from .classifier import predict_category
 
 MODEL_NAME = os.environ.get("OPENAI_MODEL", "gpt-4o-mini")
 
@@ -136,8 +137,9 @@ def summarize_transcript(transcript_text: str, api_key: str) -> VideoSummary:
         raise SummarizerError(f"Model returned unexpected output: {exc}")
 
 
-def summarize_youtube_url(url: str, api_key: str) -> tuple[str, VideoSummary]:
+def summarize_youtube_url(url: str, api_key: str) -> tuple[str, VideoSummary, dict]:
     video_id = extract_video_id(url)
     transcript_text = fetch_transcript(video_id)
     summary = summarize_transcript(transcript_text, api_key=api_key)
-    return video_id, summary
+    category = predict_category(transcript_text)
+    return video_id, summary, category

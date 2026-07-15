@@ -18,7 +18,13 @@ class SummarizeRequest(BaseModel):
     url: str = Field(..., description="Full YouTube video URL")
 
 
+class Category(BaseModel):
+    category: str = Field(..., description="Predicted category, e.g. 'tutorial', 'vlog', 'review'")
+    confidence: float = Field(..., description="Model's confidence in the prediction, 0-1")
+
+
 class SummarizeResponse(BaseModel):
     video_id: str
     video_url: str
     summary: VideoSummary
+    predicted_category: Category

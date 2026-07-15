@@ -45,7 +45,7 @@ def summarize(req: SummarizeRequest):
         )
 
     try:
-        video_id, summary = summarize_youtube_url(req.url, api_key=api_key)
+        video_id, summary, category = summarize_youtube_url(req.url, api_key=api_key)
     except SummarizerError as exc:
         raise HTTPException(status_code=400, detail=str(exc))
 
@@ -53,4 +53,5 @@ def summarize(req: SummarizeRequest):
         video_id=video_id,
         video_url=req.url,
         summary=summary,
+        predicted_category=category,
     )
