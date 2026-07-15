@@ -92,3 +92,7 @@ yt-summarizer/
 - Long videos are truncated before being sent to the model to control token usage/cost.
 - Hosted on Render's free tier — the live demo may take ~30-50 seconds to wake up if it's
   been idle.
+- The live demo may fail to fetch transcripts for some videos. This is because 
+  YouTube blocks caption requests coming from cloud server IPs (a known limitation 
+  of `youtube-transcript-api` on platforms like Render, Railway, and Fly.io). 
+  The app works reliably when run locally, since it's not coming from a flagged IP range.
