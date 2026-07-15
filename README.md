@@ -1,9 +1,18 @@
 # Reel — YouTube Video Summarizer
 
+
+**[🔗 Try it live](https://yt-summarizer-0aui.onrender.com)**
+
+
 Paste a YouTube URL, get a structured summary: overview, audience, and 5–10 key points
 each tied to a timestamp in the video.
 
 **Stack:** Python, FastAPI, OpenAI API, `youtube-transcript-api`.
+
+## Screenshots
+
+![Summarizer input screen](demo1.png)
+![Structured summary output](demo2.png)
 
 ## How it works
 
@@ -27,12 +36,6 @@ Set your OpenAI API key as an environment variable:
 
 ```bash
 export OPENAI_API_KEY="sk-..."       # Windows (PowerShell): $env:OPENAI_API_KEY="sk-..."
-```
-
-Optional — override the model (defaults to `gpt-4o-mini`):
-
-```bash
-export OPENAI_MODEL="gpt-4o-mini"
 ```
 
 ## Run
@@ -69,3 +72,23 @@ Returns:
 ```
 
 ## Project structure
+
+```
+yt-summarizer/
+├── app/
+│   ├── main.py         # FastAPI app + routes
+│   ├── summarizer.py   # transcript fetching + OpenAI summarization
+│   └── models.py       # Pydantic schemas
+├── static/
+│   └── index.html      # single-page frontend
+├── requirements.txt
+└── README.md
+```
+
+## Notes & limitations
+
+- Only works for videos that have an available English transcript (manual or
+  auto-generated captions). Videos with captions disabled will return a clear error.
+- Long videos are truncated before being sent to the model to control token usage/cost.
+- Hosted on Render's free tier — the live demo may take ~30-50 seconds to wake up if it's
+  been idle.
