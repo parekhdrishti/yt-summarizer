@@ -11,8 +11,8 @@ each tied to a timestamp in the video.
 
 ## Screenshots
 
-![Summarizer input screen](screenshots/demo1.png)
-![Structured summary output](screenshots/demo2.png)
+screenshots/demo1.png
+screenshots/demo2.png
 
 ## How it works
 
